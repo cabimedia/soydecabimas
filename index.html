@@ -7,17 +7,6 @@
   <meta name="theme-color" content="#ffffff" />
   <title>MercadoFacil — Campaña</title>
 
-  <!--
-    ═══════════════════════════════════════════════════════════════
-    OPTIMIZACIÓN DE RENDIMIENTO
-    ── Sin Tailwind CDN    → CSS crítico inline (0 requests extra)
-    ── Sin Font Awesome    → SVG inline del ícono WhatsApp
-    ── Sin Google Fonts    → system-ui (fuente nativa del dispositivo)
-    ── Sin Supabase SDK    → fetch() directo a la REST API de Supabase
-    Resultado: 1 único request HTTP (el HTML) para renderizar la página
-    ═══════════════════════════════════════════════════════════════
-  -->
-
   <!-- Preconnect solo para recursos que SE USAN al hacer click -->
   <link rel="preconnect" href="https://vglyvuyyagwwdzhtzhvh.supabase.co" crossorigin />
   <link rel="preconnect" href="https://api.ipify.org" />
@@ -469,7 +458,8 @@
     // ══════════════════════════════════════════════════════════
     const SUPABASE_URL = 'https://vglyvuyyagwwdzhtzhvh.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnbHl2dXl5YWd3d2R6aHR6aHZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjI5MjgsImV4cCI6MjA5Nzc5ODkyOH0.WGBV09G5bJ4ThSECxWWuGvwktmc_bKQh8dycZWw8DWM';
-    const WA_LINK      = '#'; // ← reemplazar con tu link de WhatsApp
+    // WA_LINK se lee directo del href del botón — solo edita el href en el HTML
+    const WA_LINK = document.getElementById('btn-wa').getAttribute('href');
 
     // ══════════════════════════════════════════════════════════
     //  SUPABASE — fetch() directo a la REST API (sin SDK 100KB)
@@ -641,7 +631,9 @@
       icon.style.display    = 'block';
       showToast('Redirigiendo a WhatsApp…');
 
-      if (WA_LINK && WA_LINK !== '#') window.location.href = WA_LINK;
+      if (WA_LINK && WA_LINK !== '#') {
+        window.location.href = WA_LINK;
+      }
     });
   </script>
 
