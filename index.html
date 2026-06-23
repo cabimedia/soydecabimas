@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Cabimedia — Campaña</title>
+
+  <!-- Tailwind Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind config: shadcn/ui tokens + colores propios -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            border:     'hsl(var(--border))',
+            background: 'hsl(var(--background))',
+            foreground: 'hsl(var(--foreground))',
+            muted: {
+              DEFAULT:    'hsl(var(--muted))',
+              foreground: 'hsl(var(--muted-foreground))',
+            },
+            wa: {
+              DEFAULT: '#25D366',
+              dark:    '#1aad53',
+              light:   '#f0fdf4',
+              ring:    'rgba(37,211,102,0.25)',
+            },
+          },
+          borderRadius: {
+            lg: 'var(--radius)',
+            md: 'calc(var(--radius) - 2px)',
+            sm: 'calc(var(--radius) - 4px)',
+          },
+          keyframes: {
+            'wa-breathe': {
+              '0%,100%': { boxShadow: '0 2px 12px rgba(37,211,102,0.20)' },
+              '50%':     { boxShadow: '0 4px 24px rgba(37,211,102,0.45)' },
+            },
+            'dot-blink': {
+              '0%,100%': { opacity: '1'   },
+              '50%':     { opacity: '0.2' },
+            },
+            'fade-down': {
+              from: { opacity: '0', transform: 'translateY(-10px)' },
+              to:   { opacity: '1', transform: 'translateY(0)'     },
+            },
+            'fade-up': {
+              from: { opacity: '0', transform: 'translateY(10px)' },
+              to:   { opacity: '1', transform: 'translateY(0)'    },
+            },
+            'fade-in': {
+              from: { opacity: '0' },
+              to:   { opacity: '1' },
+            },
+          },
+          animation: {
+            'wa-breathe': 'wa-breathe 2.6s ease-in-out infinite',
+            'dot-blink':  'dot-blink 1.6s ease-in-out infinite',
+            'fade-down':  'fade-down 0.55s ease both',
+            'fade-up':    'fade-up   0.55s ease both',
+            'fade-in':    'fade-in   0.55s ease both',
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <style>
+    /* ── shadcn/ui CSS variables (light theme) ─────────── */
+    :root {
+      --background:        0 0% 100%;
+      --foreground:        222 47% 11%;
+      --muted:             210 40% 96%;
+      --muted-foreground:  215 16% 47%;
+      --border:            214 32% 91%;
+      --radius:            0.5rem;
+    }
+
+    /* ── Animation delays ──────────────────────────────── */
+    .delay-100 { animation-delay: 100ms; }
+    .delay-200 { animation-delay: 200ms; }
+    .delay-300 { animation-delay: 300ms; }
+    .delay-400 { animation-delay: 400ms; }
+
+    /* ── Button hover: quita pulse al hover ─────────────── */
+    .btn-wa:hover  { animation: none !important; }
+    .btn-wa:active { transform: scale(0.96) !important; }
+
+    /* ── Loading spinner ─────────────────────────────────── */
+    .btn-wa.loading {
+      opacity: 0.65;
+      pointer-events: none;
+    }
+    .btn-wa.loading .btn-icon {
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast slide-up ──────────────────────────────────── */
+    #toast {
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      transform: translateX(-50%) translateY(8px);
+      opacity: 0;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ── Reduced motion ──────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; }
+    }
+  </style>
+</head>
+
+<body class="h-full bg-background font-sans antialiased text-foreground">
+
+  <!-- ═══════════════════════════════════════════
+       PAGE SHELL
+  ════════════════════════════════════════════ -->
+  <div class="min-h-screen flex flex-col items-center px-5 pt-12 pb-0">
+
+    <!-- ── MAIN ───────────────────────────────── -->
+    <main class="flex-1 flex flex-col items-center justify-center w-full max-w-sm gap-10
+                 pb-10 sm:max-w-md">
+
+      <!-- ① LOGO -->
+      <div class="animate-fade-down opacity-0 delay-100 flex items-center justify-center">
+        <!--
+          INSTRUCCIÓN: Reemplaza "logo.png" con la ruta de tu imagen.
+          Sube el archivo al mismo directorio que este index.html
+        -->
+        <img
+          src="logo.png"
+          alt="Logo del cliente"
+          id="client-logo"
+          class="w-auto max-w-[190px] max-h-[95px] object-contain
+                 sm:max-w-[230px] sm:max-h-[115px]"
+        />
+      </div>
+
+      <!-- ── SEPARATOR ────────────────────────── -->
+      <div class="animate-fade-in opacity-0 delay-200 w-full">
+        <div class="h-px bg-border"></div>
+      </div>
+
+      <!-- ② BOTÓN SECTION ─────────────────────── -->
+      <div class="animate-fade-up opacity-0 delay-300
+                  flex flex-col items-center gap-4 w-full">
+
+        <!-- Badge "en línea" -->
+        <div class="inline-flex items-center gap-2 px-3 py-1.5
+                    rounded-full border border-border bg-muted
+                    text-muted-foreground text-xs font-medium tracking-wide">
+          <span class="w-2 h-2 rounded-full bg-wa animate-dot-blink"></span>
+          Disponible ahora
+        </div>
+
+        <!-- Botón WhatsApp -->
+        <!--
+          INSTRUCCIÓN: Reemplaza el href="#" con tu link de WhatsApp.
+          Ejemplo: https://wa.me/584141234567?text=Hola%2C+me+interesa+más+información
+        -->
+        <a
+          href="#"
+          id="btn-wa"
+          class="btn-wa animate-wa-breathe
+                 inline-flex items-center justify-center gap-3
+                 w-full max-w-xs
+                 px-6 py-4
+                 rounded-full
+                 bg-wa text-white
+                 text-base font-semibold tracking-tight
+                 select-none cursor-pointer
+                 transition-transform duration-150
+                 hover:bg-wa-dark hover:scale-[1.02]
+                 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+                 focus-visible:outline-wa
+                 sm:text-lg sm:py-5 sm:max-w-sm"
+          aria-label="Ir a WhatsApp"
+        >
+          <i class="btn-icon fa-brands fa-whatsapp text-xl sm:text-2xl flex-shrink-0"></i>
+          Escríbenos por WhatsApp
+        </a>
+
+        <!-- Sub-label -->
+        <p class="text-xs text-muted-foreground font-medium tracking-wide">
+          Respuesta rápida · Sin compromiso
+        </p>
+      </div>
+
+    </main>
+
+    <!-- ── FOOTER ─────────────────────────────── -->
+    <footer class="animate-fade-in opacity-0 delay-400
+                   w-full max-w-sm sm:max-w-md
+                   py-5 mt-auto">
+      <div class="h-px bg-border mb-4"></div>
+      <p class="text-center text-[10.5px] font-medium tracking-widest uppercase
+                text-muted-foreground">
+        Powered by
+        <a href="https://cabimedia.com"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="text-wa hover:opacity-75 transition-opacity">
+          Cabimedia
+        </a>
+        &copy; 2026 &mdash; Página web temporal de campañas
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- ── TOAST ─────────────────────────────────── -->
+  <div
+    id="toast"
+    role="status"
+    aria-live="polite"
+    class="fixed bottom-6 left-1/2 z-50
+           inline-flex items-center gap-2
+           px-4 py-2.5
+           rounded-full
+           bg-foreground text-white
+           text-xs font-semibold tracking-wide
+           shadow-lg whitespace-nowrap
+           pointer-events-none"
+  >
+    <i class="fa-brands fa-whatsapp text-wa text-sm"></i>
+    <span id="toast-msg">Redirigiendo a WhatsApp…</span>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       JAVASCRIPT
+  ════════════════════════════════════════════ -->
+  <script>
+    // ══════════════════════════════════════════
+    //  CONFIGURACIÓN  ← editar estos valores
+    // ══════════════════════════════════════════
+    const SUPABASE_URL = 'https://vglyvuyyagwwdzhtzhvh.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnbHl2dXl5YWd3d2R6aHR6aHZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjI5MjgsImV4cCI6MjA5Nzc5ODkyOH0.WGBV09G5bJ4ThSECxWWuGvwktmc_bKQh8dycZWw8DWM';
+
+    const WA_LINK = '#'; // ← reemplazar con tu link de WhatsApp
+
+    // ══════════════════════════════════════════
+    //  INIT SUPABASE
+    // ══════════════════════════════════════════
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ══════════════════════════════════════════
+    //  FINGERPRINT — SHA-256 de rasgos del device
+    // ══════════════════════════════════════════
+    async function generateFingerprint() {
+      const raw = [
+        navigator.userAgent,
+        screen.width, screen.height, screen.colorDepth,
+        navigator.language,
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+        navigator.hardwareConcurrency || 0,
+        navigator.platform || '',
+      ].join('|||');
+      try {
+        const enc = new TextEncoder().encode(raw);
+        const buf = await crypto.subtle.digest('SHA-256', enc);
+        return Array.from(new Uint8Array(buf))
+          .map(b => b.toString(16).padStart(2,'0')).join('');
+      } catch {
+        return btoa(raw).slice(0, 64);
+      }
+    }
+
+    // ══════════════════════════════════════════
+    //  VISIT TOKEN — persistido en localStorage
+    // ══════════════════════════════════════════
+    function getOrCreateToken() {
+      const KEY = '_cbm_vt';
+      let token = null;
+      try { token = localStorage.getItem(KEY); } catch {}
+      if (!token) {
+        token = typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : Date.now().toString(36) + Math.random().toString(36).slice(2);
+        try { localStorage.setItem(KEY, token); } catch {}
+        return { token, isUnique: true };
+      }
+      return { token, isUnique: false };
+    }
+
+    // ══════════════════════════════════════════
+    //  PARSE USER AGENT
+    // ══════════════════════════════════════════
+    function parseUA() {
+      const ua = navigator.userAgent;
+      let browser = 'Unknown', os = 'Unknown', device = 'desktop';
+
+      if      (/CriOS/i.test(ua))          browser = 'Chrome iOS';
+      else if (/FxiOS/i.test(ua))          browser = 'Firefox iOS';
+      else if (/EdgA/i.test(ua))           browser = 'Edge Android';
+      else if (/SamsungBrowser/i.test(ua)) browser = 'Samsung';
+      else if (/OPR\/|Opera/i.test(ua))    browser = 'Opera';
+      else if (/Edg\//i.test(ua))          browser = 'Edge';
+      else if (/Chrome\//i.test(ua))       browser = 'Chrome';
+      else if (/Safari\//i.test(ua))       browser = 'Safari';
+      else if (/Firefox\//i.test(ua))      browser = 'Firefox';
+
+      if      (/iPad/i.test(ua))  { os = 'iOS';     device = 'tablet'; }
+      else if (/iPhone|iPod/i.test(ua)) { os = 'iOS'; device = 'mobile'; }
+      else if (/Android/i.test(ua)) {
+        os = 'Android';
+        device = /tablet|SM-T/i.test(ua) ? 'tablet' : 'mobile';
+      }
+      else if (/Windows/i.test(ua))  os = 'Windows';
+      else if (/Mac OS X/i.test(ua)) os = 'macOS';
+      else if (/Linux/i.test(ua))    os = 'Linux';
+
+      return { browser, os, device };
+    }
+
+    // ══════════════════════════════════════════
+    //  GET IP (timeout 3s)
+    // ══════════════════════════════════════════
+    async function getIP() {
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 3000);
+        const r = await fetch('https://api.ipify.org?format=json', { signal: ctrl.signal });
+        clearTimeout(t);
+        const d = await r.json();
+        return d.ip || null;
+      } catch { return null; }
+    }
+
+    // ══════════════════════════════════════════
+    //  UTM PARAMS
+    // ══════════════════════════════════════════
+    function getUTM() {
+      const p = new URLSearchParams(window.location.search);
+      return {
+        utm_source:   p.get('utm_source')   || null,
+        utm_medium:   p.get('utm_medium')   || null,
+        utm_campaign: p.get('utm_campaign') || null,
+      };
+    }
+
+    // ══════════════════════════════════════════
+    //  TOAST
+    // ══════════════════════════════════════════
+    let _toastTimer;
+    function showToast(msg) {
+      clearTimeout(_toastTimer);
+      document.getElementById('toast-msg').textContent = msg;
+      document.getElementById('toast').classList.add('show');
+      _toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 2600);
+    }
+
+    // ══════════════════════════════════════════
+    //  REGISTRAR EN SUPABASE
+    // ══════════════════════════════════════════
+    async function registerClick() {
+      const [fingerprint, ip] = await Promise.all([generateFingerprint(), getIP()]);
+      const { token, isUnique } = getOrCreateToken();
+      const { browser, os, device } = parseUA();
+
+      const payload = {
+        event_type:        'whatsapp_click',
+        fingerprint,
+        visit_token:       token,
+        is_unique:         isUnique,
+        ip_address:        ip,
+        browser, os,
+        device_type:       device,
+        screen_resolution: `${screen.width}x${screen.height}`,
+        language:          navigator.language || null,
+        timezone:          Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+        referrer:          document.referrer || null,
+        ...getUTM(),
+      };
+
+      try {
+        const { error } = await db.from('click_events').insert([payload]);
+        if (error) console.warn('[cbm]', error.message);
+      } catch (e) {
+        console.warn('[cbm] error:', e);
+      }
+    }
+
+    // ══════════════════════════════════════════
+    //  CLICK HANDLER
+    // ══════════════════════════════════════════
+    document.getElementById('btn-wa').addEventListener('click', async function (e) {
+      e.preventDefault();
+
+      const btn  = this;
+      const icon = btn.querySelector('.btn-icon');
+      const origClass = icon.className;
+
+      btn.classList.add('loading');
+      icon.className = 'btn-icon fa-solid fa-spinner';
+      showToast('Conectando…');
+
+      await Promise.all([
+        registerClick(),
+        new Promise(r => setTimeout(r, 500)),
+      ]);
+
+      btn.classList.remove('loading');
+      icon.className = origClass;
+      showToast('Redirigiendo a WhatsApp…');
+
+      if (WA_LINK && WA_LINK !== '#') window.location.href = WA_LINK;
+    });
+  </script>
+
+</body>
+</html>
