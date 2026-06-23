@@ -1,183 +1,380 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Cabimedia — Campaña</title>
+  <title>Facilito Cambios — Campaña</title>
 
-  <!-- Tailwind Play CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!--
+    ═══════════════════════════════════════════════════════════════
+    OPTIMIZACIÓN DE RENDIMIENTO
+    ── Sin Tailwind CDN    → CSS crítico inline (0 requests extra)
+    ── Sin Font Awesome    → SVG inline del ícono WhatsApp
+    ── Sin Google Fonts    → system-ui (fuente nativa del dispositivo)
+    ── Sin Supabase SDK    → fetch() directo a la REST API de Supabase
+    Resultado: 1 único request HTTP (el HTML) para renderizar la página
+    ═══════════════════════════════════════════════════════════════
+  -->
 
-  <!-- Tailwind config: shadcn/ui tokens + colores propios -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-          },
-          colors: {
-            border:     'hsl(var(--border))',
-            background: 'hsl(var(--background))',
-            foreground: 'hsl(var(--foreground))',
-            muted: {
-              DEFAULT:    'hsl(var(--muted))',
-              foreground: 'hsl(var(--muted-foreground))',
-            },
-            wa: {
-              DEFAULT: '#25D366',
-              dark:    '#1aad53',
-              light:   '#f0fdf4',
-              ring:    'rgba(37,211,102,0.25)',
-            },
-          },
-          borderRadius: {
-            lg: 'var(--radius)',
-            md: 'calc(var(--radius) - 2px)',
-            sm: 'calc(var(--radius) - 4px)',
-          },
-          keyframes: {
-            'wa-breathe': {
-              '0%,100%': { boxShadow: '0 2px 12px rgba(37,211,102,0.20)' },
-              '50%':     { boxShadow: '0 4px 24px rgba(37,211,102,0.45)' },
-            },
-            'dot-blink': {
-              '0%,100%': { opacity: '1'   },
-              '50%':     { opacity: '0.2' },
-            },
-            'fade-down': {
-              from: { opacity: '0', transform: 'translateY(-10px)' },
-              to:   { opacity: '1', transform: 'translateY(0)'     },
-            },
-            'fade-up': {
-              from: { opacity: '0', transform: 'translateY(10px)' },
-              to:   { opacity: '1', transform: 'translateY(0)'    },
-            },
-            'fade-in': {
-              from: { opacity: '0' },
-              to:   { opacity: '1' },
-            },
-          },
-          animation: {
-            'wa-breathe': 'wa-breathe 2.6s ease-in-out infinite',
-            'dot-blink':  'dot-blink 1.6s ease-in-out infinite',
-            'fade-down':  'fade-down 0.55s ease both',
-            'fade-up':    'fade-up   0.55s ease both',
-            'fade-in':    'fade-in   0.55s ease both',
-          },
-        },
-      },
-    }
-  </script>
+  <!-- Preconnect solo para recursos que SE USAN al hacer click -->
+  <link rel="preconnect" href="https://vglyvuyyagwwdzhtzhvh.supabase.co" crossorigin />
+  <link rel="preconnect" href="https://api.ipify.org" />
 
-  <!-- Font Awesome 6 -->
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet" />
-
-  <!-- Supabase JS v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- Preload del logo (es el LCP — se carga con máxima prioridad) -->
+  <link rel="preload" as="image" href="logo.webp" type="image/webp" />
 
   <style>
-    /* ── shadcn/ui CSS variables (light theme) ─────────── */
+    /* ════════════════════════════════════════
+       TOKENS — shadcn/ui light theme
+    ════════════════════════════════════════ */
     :root {
-      --background:        0 0% 100%;
-      --foreground:        222 47% 11%;
-      --muted:             210 40% 96%;
-      --muted-foreground:  215 16% 47%;
-      --border:            214 32% 91%;
-      --radius:            0.5rem;
+      --bg:           #ffffff;
+      --fg:           hsl(222, 47%, 11%);
+      --muted-bg:     hsl(210, 40%, 96%);
+      --muted-fg:     hsl(215, 16%, 47%);
+      --border:       hsl(214, 32%, 91%);
+      --wa:           #25D366;
+      --wa-dark:      #1aad53;
+      --wa-glow-lo:   rgba(37,211,102,0.20);
+      --wa-glow-hi:   rgba(37,211,102,0.45);
+      --radius:       0.5rem;
+      --font:         system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
 
-    /* ── Animation delays ──────────────────────────────── */
-    .delay-100 { animation-delay: 100ms; }
-    .delay-200 { animation-delay: 200ms; }
-    .delay-300 { animation-delay: 300ms; }
-    .delay-400 { animation-delay: 400ms; }
+    /* ════════════════════════════════════════
+       RESET
+    ════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
 
-    /* ── Button hover: quita pulse al hover ─────────────── */
-    .btn-wa:hover  { animation: none !important; }
-    .btn-wa:active { transform: scale(0.96) !important; }
+    body {
+      min-height: 100%;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-    /* ── Loading spinner ─────────────────────────────────── */
+    /* ════════════════════════════════════════
+       LAYOUT
+    ════════════════════════════════════════ */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.25rem 0;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 24rem;        /* 384px — sm:max-w-md en Tailwind */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2.5rem;
+      padding-bottom: 2.5rem;
+    }
+
+    /* ════════════════════════════════════════
+       LOGO
+    ════════════════════════════════════════ */
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-wrap img {
+      width: auto;
+      max-width: 190px;
+      max-height: 95px;
+      object-fit: contain;
+      /* NO lazy — es el LCP, debe cargar inmediato */
+    }
+
+    /* ════════════════════════════════════════
+       SEPARATOR
+    ════════════════════════════════════════ */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ════════════════════════════════════════
+       BOTÓN SECTION
+    ════════════════════════════════════════ */
+    .btn-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      border: 1px solid var(--border);
+      background: var(--muted-bg);
+      color: var(--muted-fg);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.025em;
+    }
+
+    .badge-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 9999px;
+      background: var(--wa);
+      animation: dot-blink 1.6s ease-in-out infinite;
+    }
+
+    /* Botón WhatsApp */
+    .btn-wa {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 20rem;
+      padding: 1rem 1.5rem;
+      border-radius: 9999px;
+      background: var(--wa);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, transform 0.15s;
+      animation: wa-breathe 2.6s ease-in-out infinite;
+    }
+
+    .btn-wa:hover  {
+      background: var(--wa-dark);
+      transform: scale(1.02);
+      animation: none;
+    }
+    .btn-wa:active { transform: scale(0.96); animation: none; }
+    .btn-wa:focus-visible {
+      outline: 2px solid var(--wa);
+      outline-offset: 2px;
+    }
+
+    /* Ícono SVG dentro del botón */
+    .btn-wa svg { flex-shrink: 0; }
+
+    /* Estado loading */
     .btn-wa.loading {
       opacity: 0.65;
       pointer-events: none;
+      animation: none;
     }
-    .btn-wa.loading .btn-icon {
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Toast slide-up ──────────────────────────────────── */
+    /* Sub-label */
+    .sub-label {
+      font-size: 0.75rem;
+      color: var(--muted-fg);
+      font-weight: 500;
+      letter-spacing: 0.025em;
+    }
+
+    /* ════════════════════════════════════════
+       FOOTER
+    ════════════════════════════════════════ */
+    footer {
+      width: 100%;
+      max-width: 24rem;
+      padding: 1.25rem 0 1.75rem;
+      margin-top: auto;
+    }
+
+    .footer-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 1rem;
+    }
+
+    .footer-text {
+      text-align: center;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted-fg);
+    }
+
+    .footer-text a {
+      color: var(--wa);
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+
+    .footer-text a:hover { opacity: 0.75; }
+
+    /* ════════════════════════════════════════
+       TOAST
+    ════════════════════════════════════════ */
     #toast {
-      transition: opacity 0.28s ease, transform 0.28s ease;
-      transform: translateX(-50%) translateY(8px);
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      z-index: 50;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      border-radius: 9999px;
+      background: var(--fg);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.025em;
+      white-space: nowrap;
+      pointer-events: none;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      /* Slide-up transition */
       opacity: 0;
-    }
-    #toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
+      transform: translateX(-50%) translateY(8px);
+      transition: opacity 0.28s ease, transform 0.28s ease;
     }
 
-    /* ── Reduced motion ──────────────────────────────────── */
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #toast-icon { color: var(--wa); }
+
+    /* ════════════════════════════════════════
+       ANIMATIONS
+    ════════════════════════════════════════ */
+    @keyframes wa-breathe {
+      0%, 100% { box-shadow: 0 2px 12px var(--wa-glow-lo); }
+      50%       { box-shadow: 0 4px 24px var(--wa-glow-hi); }
+    }
+
+    @keyframes dot-blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+
+    @keyframes fade-down {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0);     }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Clases de animación (equivalentes a las de Tailwind) */
+    .anim-fade-down { animation: fade-down 0.5s ease both; }
+    .anim-fade-in   { animation: fade-in  0.5s ease both; }
+    .anim-fade-up   { animation: fade-up  0.5s ease both; }
+
+    .delay-1 { animation-delay: 80ms;  }
+    .delay-2 { animation-delay: 180ms; }
+    .delay-3 { animation-delay: 280ms; }
+    .delay-4 { animation-delay: 380ms; }
+
+    .spin { animation: spin 0.7s linear infinite; }
+
+    /* ════════════════════════════════════════
+       RESPONSIVE — sm: 640px
+    ════════════════════════════════════════ */
+    @media (min-width: 640px) {
+      main, footer { max-width: 28rem; }
+
+      .logo-wrap img {
+        max-width: 230px;
+        max-height: 115px;
+      }
+
+      .btn-wa {
+        font-size: 1.125rem;
+        padding: 1.25rem 1.5rem;
+        max-width: 24rem;
+      }
+
+      .btn-wa svg { width: 26px; height: 26px; }
+    }
+
+    /* ════════════════════════════════════════
+       REDUCED MOTION
+    ════════════════════════════════════════ */
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation: none !important; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
     }
   </style>
 </head>
 
-<body class="h-full bg-background font-sans antialiased text-foreground">
+<body>
+  <div class="page">
 
-  <!-- ═══════════════════════════════════════════
-       PAGE SHELL
-  ════════════════════════════════════════════ -->
-  <div class="min-h-screen flex flex-col items-center px-5 pt-12 pb-0">
+    <!-- ── MAIN ─────────────────────────────── -->
+    <main>
 
-    <!-- ── MAIN ───────────────────────────────── -->
-    <main class="flex-1 flex flex-col items-center justify-center w-full max-w-sm gap-10
-                 pb-10 sm:max-w-md">
-
-      <!-- ① LOGO -->
-      <div class="animate-fade-down opacity-0 delay-100 flex items-center justify-center">
-        <!--
-          INSTRUCCIÓN: Reemplaza "logo.png" con la ruta de tu imagen.
-          Sube el archivo al mismo directorio que este index.html
-        -->
-        <img
-          src="logo.png"
-          alt="Logo del cliente"
-          id="client-logo"
-          class="w-auto max-w-[190px] max-h-[95px] object-contain
-                 sm:max-w-[230px] sm:max-h-[115px]"
-        />
+      <!-- ① LOGO
+           INSTRUCCIÓN: Sube "logo.webp" y "logo.png" al mismo directorio.
+           El <picture> sirve WebP si el browser lo soporta (más rápido),
+           y recae en PNG como fallback.
+           Convierte tu logo en: https://squoosh.app  (WebP, calidad 85)
+      -->
+      <div class="logo-wrap anim-fade-down delay-1">
+        <picture>
+          <source srcset="logo.webp" type="image/webp" />
+          <img
+            src="logo.png"
+            alt="Facilito Cambios"
+            width="190"
+            height="95"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </picture>
       </div>
 
-      <!-- ── SEPARATOR ────────────────────────── -->
-      <div class="animate-fade-in opacity-0 delay-200 w-full">
-        <div class="h-px bg-border"></div>
-      </div>
+      <!-- SEPARATOR -->
+      <div class="divider anim-fade-in delay-2"></div>
 
-      <!-- ② BOTÓN SECTION ─────────────────────── -->
-      <div class="animate-fade-up opacity-0 delay-300
-                  flex flex-col items-center gap-4 w-full">
+      <!-- ② BOTÓN WHATSAPP -->
+      <div class="btn-section anim-fade-up delay-3">
 
-        <!-- Badge "en línea" -->
-        <div class="inline-flex items-center gap-2 px-3 py-1.5
-                    rounded-full border border-border bg-muted
-                    text-muted-foreground text-xs font-medium tracking-wide">
-          <span class="w-2 h-2 rounded-full bg-wa animate-dot-blink"></span>
-          Disponible ahora
+        <!-- Badge -->
+        <div class="badge">
+          <span class="badge-dot"></span>
+          910 miembros
         </div>
 
-        <!-- Botón WhatsApp -->
         <!--
           INSTRUCCIÓN: Reemplaza el href="#" con tu link de WhatsApp.
           Ejemplo: https://wa.me/584141234567?text=Hola%2C+me+interesa+más+información
@@ -185,93 +382,114 @@
         <a
           href="#"
           id="btn-wa"
-          class="btn-wa animate-wa-breathe
-                 inline-flex items-center justify-center gap-3
-                 w-full max-w-xs
-                 px-6 py-4
-                 rounded-full
-                 bg-wa text-white
-                 text-base font-semibold tracking-tight
-                 select-none cursor-pointer
-                 transition-transform duration-150
-                 hover:bg-wa-dark hover:scale-[1.02]
-                 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
-                 focus-visible:outline-wa
-                 sm:text-lg sm:py-5 sm:max-w-sm"
+          class="btn-wa"
           aria-label="Ir a WhatsApp"
         >
-          <i class="btn-icon fa-brands fa-whatsapp text-xl sm:text-2xl flex-shrink-0"></i>
-          Escríbenos por WhatsApp
+          <!-- Ícono WhatsApp inline SVG — sin Font Awesome, sin requests extra -->
+          <svg id="btn-icon" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 448 512" fill="currentColor"
+               width="22" height="22" aria-hidden="true">
+            <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222
+                     0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1
+                     c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6
+                     c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7
+                     c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5
+                     49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5
+                     0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18
+                     -5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2
+                     -12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3
+                     1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3
+                     -12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9
+                     -5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4
+                     2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9
+                     10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4
+                     -1.3-2.5-5-3.9-10.5-6.6z"/>
+          </svg>
+
+          <!-- Spinner SVG (reemplaza FA spinner al hacer click) -->
+          <svg id="btn-spinner" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="22" height="22"
+               aria-hidden="true" style="display:none;">
+            <circle cx="12" cy="12" r="10"
+                    stroke="rgba(255,255,255,0.3)" stroke-width="4" fill="none"/>
+            <path fill="white"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+
+          ¡Únete al Grupo de Whatsapp!
         </a>
 
-        <!-- Sub-label -->
-        <p class="text-xs text-muted-foreground font-medium tracking-wide">
-          Respuesta rápida · Sin compromiso
-        </p>
+        <p class="sub-label">Respuesta rápida · Sin compromiso</p>
       </div>
 
     </main>
 
     <!-- ── FOOTER ─────────────────────────────── -->
-    <footer class="animate-fade-in opacity-0 delay-400
-                   w-full max-w-sm sm:max-w-md
-                   py-5 mt-auto">
-      <div class="h-px bg-border mb-4"></div>
-      <p class="text-center text-[10.5px] font-medium tracking-widest uppercase
-                text-muted-foreground">
+    <footer class="anim-fade-in delay-4">
+      <div class="footer-divider"></div>
+      <p class="footer-text">
         Powered by
-        <a href="https://cabimedia.com"
+        <a href="https://edevis18.github.io/edevisraga"
            target="_blank"
-           rel="noopener noreferrer"
-           class="text-wa hover:opacity-75 transition-opacity">
-          Cabimedia
-        </a>
+           rel="noopener noreferrer">EdevisR</a>
         &copy; 2026 &mdash; Página web temporal de campañas
       </p>
     </footer>
 
-  </div>
+  </div><!-- /.page -->
 
   <!-- ── TOAST ─────────────────────────────────── -->
-  <div
-    id="toast"
-    role="status"
-    aria-live="polite"
-    class="fixed bottom-6 left-1/2 z-50
-           inline-flex items-center gap-2
-           px-4 py-2.5
-           rounded-full
-           bg-foreground text-white
-           text-xs font-semibold tracking-wide
-           shadow-lg whitespace-nowrap
-           pointer-events-none"
-  >
-    <i class="fa-brands fa-whatsapp text-wa text-sm"></i>
+  <div id="toast" role="status" aria-live="polite">
+    <svg id="toast-icon" xmlns="http://www.w3.org/2000/svg"
+         viewBox="0 0 448 512" fill="currentColor"
+         width="14" height="14" aria-hidden="true">
+      <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222
+               0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1
+               c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6
+               c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7
+               c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5
+               49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5
+               0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18
+               -5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2
+               -12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3
+               1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3
+               -12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9
+               -5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4
+               2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9
+               10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4
+               -1.3-2.5-5-3.9-10.5-6.6z"/>
+    </svg>
     <span id="toast-msg">Redirigiendo a WhatsApp…</span>
   </div>
 
 
-  <!-- ═══════════════════════════════════════════
-       JAVASCRIPT
-  ════════════════════════════════════════════ -->
   <script>
-    // ══════════════════════════════════════════
-    //  CONFIGURACIÓN  ← editar estos valores
-    // ══════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════
+    //  CONFIGURACIÓN ← editar estos valores
+    // ══════════════════════════════════════════════════════════
     const SUPABASE_URL = 'https://vglyvuyyagwwdzhtzhvh.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnbHl2dXl5YWd3d2R6aHR6aHZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjI5MjgsImV4cCI6MjA5Nzc5ODkyOH0.WGBV09G5bJ4ThSECxWWuGvwktmc_bKQh8dycZWw8DWM';
+    const WA_LINK      = '#'; // ← reemplazar con tu link de WhatsApp
 
-    const WA_LINK = '#'; // ← reemplazar con tu link de WhatsApp
+    // ══════════════════════════════════════════════════════════
+    //  SUPABASE — fetch() directo a la REST API (sin SDK 100KB)
+    // ══════════════════════════════════════════════════════════
+    async function insertEvent(payload) {
+      await fetch(`${SUPABASE_URL}/rest/v1/click_events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey':        SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Prefer':        'return=minimal',
+        },
+        body: JSON.stringify(payload),
+      });
+    }
 
-    // ══════════════════════════════════════════
-    //  INIT SUPABASE
-    // ══════════════════════════════════════════
-    const { createClient } = supabase;
-    const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // ══════════════════════════════════════════
-    //  FINGERPRINT — SHA-256 de rasgos del device
-    // ══════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════
+    //  FINGERPRINT — SHA-256 de rasgos del dispositivo
+    // ══════════════════════════════════════════════════════════
     async function generateFingerprint() {
       const raw = [
         navigator.userAgent,
@@ -291,9 +509,9 @@
       }
     }
 
-    // ══════════════════════════════════════════
-    //  VISIT TOKEN — persistido en localStorage
-    // ══════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════
+    //  VISIT TOKEN — localStorage para detectar visita única
+    // ══════════════════════════════════════════════════════════
     function getOrCreateToken() {
       const KEY = '_cbm_vt';
       let token = null;
@@ -308,9 +526,9 @@
       return { token, isUnique: false };
     }
 
-    // ══════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════
     //  PARSE USER AGENT
-    // ══════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════
     function parseUA() {
       const ua = navigator.userAgent;
       let browser = 'Unknown', os = 'Unknown', device = 'desktop';
@@ -325,8 +543,8 @@
       else if (/Safari\//i.test(ua))       browser = 'Safari';
       else if (/Firefox\//i.test(ua))      browser = 'Firefox';
 
-      if      (/iPad/i.test(ua))  { os = 'iOS';     device = 'tablet'; }
-      else if (/iPhone|iPod/i.test(ua)) { os = 'iOS'; device = 'mobile'; }
+      if      (/iPad/i.test(ua))             { os = 'iOS';     device = 'tablet'; }
+      else if (/iPhone|iPod/i.test(ua))      { os = 'iOS';     device = 'mobile'; }
       else if (/Android/i.test(ua)) {
         os = 'Android';
         device = /tablet|SM-T/i.test(ua) ? 'tablet' : 'mobile';
@@ -338,23 +556,22 @@
       return { browser, os, device };
     }
 
-    // ══════════════════════════════════════════
-    //  GET IP (timeout 3s)
-    // ══════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════
+    //  GET IP — solo se llama al hacer click (no bloquea carga)
+    // ══════════════════════════════════════════════════════════
     async function getIP() {
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 3000);
         const r = await fetch('https://api.ipify.org?format=json', { signal: ctrl.signal });
         clearTimeout(t);
-        const d = await r.json();
-        return d.ip || null;
+        return (await r.json()).ip || null;
       } catch { return null; }
     }
 
-    // ══════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════
     //  UTM PARAMS
-    // ══════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════
     function getUTM() {
       const p = new URLSearchParams(window.location.search);
       return {
@@ -364,26 +581,45 @@
       };
     }
 
-    // ══════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════
     //  TOAST
-    // ══════════════════════════════════════════
-    let _toastTimer;
+    // ══════════════════════════════════════════════════════════
+    let _tt;
     function showToast(msg) {
-      clearTimeout(_toastTimer);
+      clearTimeout(_tt);
       document.getElementById('toast-msg').textContent = msg;
       document.getElementById('toast').classList.add('show');
-      _toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 2600);
+      _tt = setTimeout(() => document.getElementById('toast').classList.remove('show'), 2600);
     }
 
-    // ══════════════════════════════════════════
-    //  REGISTRAR EN SUPABASE
-    // ══════════════════════════════════════════
-    async function registerClick() {
-      const [fingerprint, ip] = await Promise.all([generateFingerprint(), getIP()]);
-      const { token, isUnique } = getOrCreateToken();
-      const { browser, os, device } = parseUA();
+    // ══════════════════════════════════════════════════════════
+    //  CLICK HANDLER
+    // ══════════════════════════════════════════════════════════
+    document.getElementById('btn-wa').addEventListener('click', async function (e) {
+      e.preventDefault();
 
-      const payload = {
+      const btn     = this;
+      const icon    = document.getElementById('btn-icon');
+      const spinner = document.getElementById('btn-spinner');
+
+      // Estado loading
+      btn.classList.add('loading');
+      icon.style.display    = 'none';
+      spinner.style.display = 'block';
+      spinner.classList.add('spin');
+      showToast('Conectando…');
+
+      // Tracking + espera mínima de UX
+      const { browser, os, device } = parseUA();
+      const [fingerprint, ip] = await Promise.all([
+        generateFingerprint(),
+        getIP(),
+        new Promise(r => setTimeout(r, 400)),
+      ]);
+
+      const { token, isUnique } = getOrCreateToken();
+
+      await insertEvent({
         event_type:        'whatsapp_click',
         fingerprint,
         visit_token:       token,
@@ -392,41 +628,17 @@
         browser, os,
         device_type:       device,
         screen_resolution: `${screen.width}x${screen.height}`,
-        language:          navigator.language || null,
+        language:          navigator.language   || null,
         timezone:          Intl.DateTimeFormat().resolvedOptions().timeZone || null,
-        referrer:          document.referrer || null,
+        referrer:          document.referrer    || null,
         ...getUTM(),
-      };
+      });
 
-      try {
-        const { error } = await db.from('click_events').insert([payload]);
-        if (error) console.warn('[cbm]', error.message);
-      } catch (e) {
-        console.warn('[cbm] error:', e);
-      }
-    }
-
-    // ══════════════════════════════════════════
-    //  CLICK HANDLER
-    // ══════════════════════════════════════════
-    document.getElementById('btn-wa').addEventListener('click', async function (e) {
-      e.preventDefault();
-
-      const btn  = this;
-      const icon = btn.querySelector('.btn-icon');
-      const origClass = icon.className;
-
-      btn.classList.add('loading');
-      icon.className = 'btn-icon fa-solid fa-spinner';
-      showToast('Conectando…');
-
-      await Promise.all([
-        registerClick(),
-        new Promise(r => setTimeout(r, 500)),
-      ]);
-
+      // Restaurar botón
       btn.classList.remove('loading');
-      icon.className = origClass;
+      spinner.classList.remove('spin');
+      spinner.style.display = 'none';
+      icon.style.display    = 'block';
       showToast('Redirigiendo a WhatsApp…');
 
       if (WA_LINK && WA_LINK !== '#') window.location.href = WA_LINK;
